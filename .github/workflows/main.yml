@@ -1,0 +1,21 @@
+name: Build SPRX
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install OpenOrbis SDK
+      run: |
+        sudo apt-get update
+        wget https://github.com
+        tar -xvf OpenOrbis_PS4_Toolchain_v0.5.2.tar.gz
+        echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis" >> $GITHUB_ENV
+    - name: Build Project
+      run: make
+    - name: Upload Result
+      uses: actions/upload-artifact@v3
+      with:
+        name: XanzyMenu-SPRX
+        path: bin/
+        
