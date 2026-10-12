@@ -4,18 +4,47 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install OpenOrbis SDK
       run: |
         sudo apt-get update
         wget https://github.com
         tar -xvf OpenOrbis_PS4_Toolchain_v0.5.2.tar.gz
+        mv OpenOrbis $GITHUB_WORKSPACE/OpenOrbis
         echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis" >> $GITHUB_ENV
+    - name: Auto Create Missing Headers
+      run: |
+        echo '#pragma once' > types.h
+        echo 'typedef int Player;' >> types.h
+        echo 'typedef int Ped;' >> types.h
+        echo 'typedef int Vehicle;' >> types.h
+        echo 'typedef int Hash;' >> types.h
+        echo 'struct Vector3 { float x; float y; float z; };' >> types.h
+        
+        echo '#pragma once' > natives.h
+        echo '#include "types.h"' >> natives.h
+        echo 'namespace PLAYER { Player PLAYER_ID(); Ped PLAYER_PED_ID(); Ped GET_PLAYER_PED_SCRIPT_INDEX(Player); }' >> natives.h
+        echo 'namespace ENTITY { bool DOES_ENTITY_EXIST(int); bool IS_ENTITY_DEAD(int); Vector3 GET_ENTITY_COORDS(int, bool); void SET_ENTITY_COORDS(int, float, float, float, int, int, int, bool); }' >> natives.h
+        echo 'namespace PED { bool IS_PED_IN_ANY_VEHICLE(Ped, bool); Vehicle GET_VEHICLE_PED_IS_IN(Ped, bool); void SET_PED_COMPONENT_VARIATION(Ped, int, int, int, int); void SET_PED_DEFAULT_COMPONENT_VARIATION(Ped); }' >> natives.h
+        echo 'namespace STREAMING { void REQUEST_MODEL(Hash); bool HAS_MODEL_LOADED(Hash); void SET_MODEL_AS_NO_LONGER_NEEDED(Hash); }' >> natives.h
+        echo 'namespace OBJECT { void CREATE_AMBIENT_PICKUP(Hash, float, float, float, int, int, Hash, bool, bool); }' >> natives.h
+        echo 'namespace CONTROLS { bool IS_DISABLED_CONTROL_PRESSED(int, int); bool IS_DISABLED_CONTROL_JUST_PRESSED(int, int); }' >> natives.h
+        echo 'namespace GRAPHICS { void DRAW_RECT(float, float, float, float, int, int, int, int); void MINI_SUB_STRING_CELL_SET_FORMAT_X(const char*, ...); }' >> natives.h
+        echo 'namespace UI { void SET_TEXT_FONT(int); void SET_TEXT_SCALE(float, float); void SET_TEXT_COLOUR(int, int, int, int); void SET_TEXT_WRAP(float, float); void SET_TEXT_CENTRE(bool); void _SET_TEXT_ENTRY(const char*); void _ADD_TEXT_COMPONENT_STRING(const char*); void _DRAW_TEXT(float, float); }' >> natives.h
+        echo 'namespace SYSTEM { void WAIT(int); }' >> natives.h
+        echo 'namespace GAMEPLAY { Hash GET_HASH_KEY(const char*); }' >> natives.h
+        echo '#define CONTROL_FRONTEND_X 203' >> natives.h
+        echo '#define CONTROL_FRONTEND_RIGHT 206' >> natives.h
+        echo '#define CONTROL_FRONTEND_UP 204' >> natives.h
+        echo '#define CONTROL_FRONTEND_DOWN 205' >> natives.h
+        echo '#define CONTROL_FRONTEND_LEFT 207' >> natives.h
+        echo '#define CONTROL_FRONTEND_ACCEPT 201' >> natives.h
     - name: Build Project
       run: make
     - name: Upload Result
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: XanzyMenu-SPRX
         path: bin/
+        
         
